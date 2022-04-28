@@ -5,19 +5,6 @@ from tqdm import tqdm
 from restore_mnist.model import prep_pixels
 
 
-def distinguish_left_right(split_images):
-    sides = {
-        "right": [],
-        "left": [],
-    }
-    for i, img in enumerate(split_images):
-        if img[:, 0].sum() > img[:, -1].sum():
-            sides["right"].append(i)
-        else:
-            sides["left"].append(i)
-    return sides
-
-
 def find_pair_candidates(dist, sides):
     pair_candidates = {}
     for i in tqdm(range(dist.shape[0])):
@@ -77,3 +64,22 @@ def compute_accuracy(pairs, labels):
             is_correct.append(0)
 
     return np.mean(is_correct).item()
+
+
+def distinguish_left_right(split_images):
+    sides = {
+        "right": [],
+        "left": [],
+    }
+    for i, img in enumerate(split_images):
+        if img[:, 0].sum() > img[:, -1].sum():
+            sides["right"].append(i)
+        else:
+            sides["left"].append(i)
+
+    # stupid rule to ensure n. left = n. right (should be reviewed)
+    both = sides["right"] + sides["left"]
+    sides["right"] = both[: len(both) // 2]
+    sides["left"] = both[len(both) // 2 :]
+
+    return sides
