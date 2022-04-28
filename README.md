@@ -29,7 +29,7 @@ With the default parameters, we get an accuracy of 34.7%
 Note that, at inference time, this is framed as a classification problem with as many classes as the number images (10k). 
 Therefore, any accuracy above 0.01% is better than a random guess.
 
-## Possible improvements
+## Possible improvements
 
 - inference is done sequentially, therefore the last images will have less candidates. This should be avoided; e.g the pairs with higher probability should be assigned with higher priority across the samples
 - the rule to make sure that the number of left and the number of right halfs is the same should be reviewed, e.g. by constructing a ranking based on the ratio of the sum of the left/right edges
