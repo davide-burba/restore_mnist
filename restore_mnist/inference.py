@@ -5,11 +5,10 @@ from tqdm import tqdm
 from restore_mnist.model import prep_pixels
 
 
-def find_pair_candidates(dist, sides):
+def find_pair_candidates(dist, sides, n):
     pair_candidates = {}
     for i in tqdm(range(dist.shape[0])):
-        # j_candidates = np.argpartition(dist[i], n)[:n]
-        j_candidates = np.argsort(dist[i])
+        j_candidates = np.argpartition(dist[i], n)[:n]
         pair_candidates[sides["left"][i]] = [
             sides["right"][int(j)] for j in j_candidates
         ]
@@ -28,14 +27,11 @@ def run_inference(split_images, model, n_candidates=300):
     dist = distance_matrix(x_left, x_right)
 
     # find candidates
-    pair_candidates = find_pair_candidates(dist, sides)
+    pair_candidates = find_pair_candidates(dist, sides, n_candidates)
 
     # take best candidates
     pairs = []
-    taken = set()
-    for i, l in tqdm(pair_candidates.items()):
-
-        l_sel = [j for j in l if j not in taken][:n_candidates]
+    for i, l_sel in tqdm(pair_candidates.items()):
 
         candidates = np.concatenate(
             [
@@ -50,7 +46,6 @@ def run_inference(split_images, model, n_candidates=300):
         pred = model.predict(candidates)[:, 1]
         j = l_sel[np.argmax(pred)]
         pairs.append((i, j))
-        taken.add(j)
 
     return pairs
 
