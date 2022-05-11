@@ -19,7 +19,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_epochs",
-        default=10,
+        default=7,
         help="Number of training epochs",
         type=int,
     )
@@ -39,10 +39,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Load data")
-    train_images, test_images = load_data(args.data_path)
+    train_images, test_images, train_original_labels, test_original_labels = load_data(
+        args.data_path
+    )
 
     print("Train model")
-    model = train_model(train_images, test_images, n_epochs=args.n_epochs)
+    model = train_model(
+        train_images,
+        test_images,
+        train_original_labels,
+        test_original_labels,
+        n_epochs=args.n_epochs,
+    )
 
     print("Run inference")
     split_images, labels = build_split_images(test_images)

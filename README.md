@@ -25,14 +25,15 @@ poetry run python main.py  [-h] [--data_path DATA_PATH] [--n_epochs N_EPOCHS] [-
 
 ## Results
 
-With the default parameters, we get an accuracy of 34.7%
+With the default parameters, we get an accuracy of 45.6%.
 Note that, at inference time, this is framed as a classification problem with as many classes as the number images (10k). 
 Therefore, any accuracy above 0.01% is better than a random guess.
+If we frame the problem as reconstructing images with matching number labels for left and right side (i.e. 10 classes), than we get an accuracy of ~100%.
 
 ## Possible improvements
 
-- inference is done sequentially, therefore the last images will have less candidates. This should be avoided; e.g the pairs with higher probability should be assigned with higher priority across the samples
+- training and inference distribution is different. Training could be improved by building the wrong images according to edge distances.
+- the model hyperparameters could be optimized
 - the rule to make sure that the number of left and the number of right halfs is the same should be reviewed, e.g. by constructing a ranking based on the ratio of the sum of the left/right edges
-- the model was not optimized at all
-- the training data in the binary task is balanced by downsampling the majority class. It could be worth to try upsampling the minority class instead.
+- the training data in the binary task is balanced by downsampling the majority class to the same size of the minority one. It could be worth to try different ratios.
 - code could be made more efficient (especially at inference time), better documented, and refactored
