@@ -13,18 +13,24 @@ from tensorflow.keras.optimizers import SGD
 from restore_mnist.data_handling import build_split_images
 
 
-def train_model(train_images, test_images, n_epochs=10):
+def train_model(
+    train_images, test_images, train_original_labels, test_original_labels, n_epochs=10
+):
     """
     Train a model to understand if the two halfs of
     an image match.
     """
-    trainX, trainY, testX, testY = build_data_for_classifier(train_images, test_images)
+    trainX, trainY, testX, testY = build_data_for_classifier(
+        train_images, test_images, train_original_labels, test_original_labels
+    )
     trainX = prep_pixels(trainX)
     testX = prep_pixels(testX)
     return _train_model(trainX, trainY, testX, testY, n_epochs)
 
 
-def build_data_for_classifier(train_images, test_images):
+def build_data_for_classifier(
+    train_images, test_images, train_original_labels, test_original_labels
+):
     """
     Build data for binary classifiers. Ones correspond to images
     with matching left and right halfs, zero with un-matching ones.
@@ -34,7 +40,9 @@ def build_data_for_classifier(train_images, test_images):
         train_binary_labels,
         half_test_images,
         test_binary_labels,
-    ) = _build_data_for_classifier(train_images, test_images)
+    ) = _build_data_for_classifier(
+        train_images, test_images, train_original_labels, test_original_labels
+    )
 
     # format dataset
     trainX = np.concatenate(
@@ -56,11 +64,17 @@ def _build_wrong_images_labels(split_images, labels):
     Build a list of images with un-matching left and right half,
     and the corresponding labels (all zeros except for random ones).
     """
-    lefts = [i for i, v in enumerate(labels) if "left" in v]
-    rights = [i for i, v in enumerate(labels) if "right" in v]
+    left_idx = []
+    right_idx = []
+    for orig_lab in set(v.split("_")[1] for v in labels):
+        lefts = [i for i, v in enumerate(labels) if f"left_{orig_lab}" in v]
+        rights = [i for i, v in enumerate(labels) if f"right_{orig_lab}" in v]
 
-    left_idx = np.random.choice(lefts, size=len(split_images))
-    right_idx = np.random.choice(rights, size=len(split_images))
+        left_idx += list(np.random.choice(lefts, size=len(lefts)))
+        right_idx += list(np.random.choice(rights, size=len(rights)))
+
+    left_idx = np.array(left_idx)
+    right_idx = np.array(right_idx)
 
     wrong_images = [
         np.concatenate([split_images[i], split_images[j]], axis=1)
@@ -71,9 +85,15 @@ def _build_wrong_images_labels(split_images, labels):
     return wrong_images, wrong_labels
 
 
-def _build_data_for_classifier(train_images, test_images):
-    split_train_images, train_labels = build_split_images(train_images)
-    split_test_images, test_labels = build_split_images(test_images)
+def _build_data_for_classifier(
+    train_images, test_images, train_original_labels, test_original_labels
+):
+    split_train_images, train_labels = build_split_images(
+        train_images, train_original_labels
+    )
+    split_test_images, test_labels = build_split_images(
+        test_images, test_original_labels
+    )
 
     wrong_train_images, wrong_train_binary_labels = _build_wrong_images_labels(
         split_train_images, train_labels

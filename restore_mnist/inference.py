@@ -53,7 +53,7 @@ def run_inference(split_images, model, n_candidates=300):
 def compute_accuracy(pairs, labels):
     is_correct = []
     for i, j in pairs:
-        if labels[i].split("_")[1] == labels[j].split("_")[1]:
+        if labels[i].split("_")[-1] == labels[j].split("_")[-1]:
             is_correct.append(1)
         else:
             is_correct.append(0)
